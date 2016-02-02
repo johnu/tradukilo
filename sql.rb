@@ -63,7 +63,18 @@ class SqlTransformer
   end
 
   def apply(value)
+    if value[:or]
+      "(" + value[:or].map{|v| apply(v)}.join(' OR ') + ")"
+    else
+      data = transform_data(value[:data], value[:op])
 
+      case value[:op]
+      when :eq
+        "#{field} = #{data}"
+      when :gt
+        "#{field} > #{data}"
+      end
+    end
   end
 
   def transform_data(value, op)
