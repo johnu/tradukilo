@@ -83,7 +83,22 @@ class ArelTransformer
   end
 
   def apply(value)
+    if value[:or]
+      value[:or].map{ |v| apply(v) }.inject(&:or)
+    else
+      data = transform_data(value[:data], value[:op])
 
+      case value[:op]
+      when :eq
+        if datatype == 'date' && database_time?
+          field.gteq(data.beginning_of_day).and(field.lteq(data.end_of_day))
+        else
+          field.eq(data)
+        end
+      when :gt
+        field.gt(data)
+      end
+    end
   end
 
   def transform_data(value, op)
