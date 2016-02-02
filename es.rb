@@ -58,7 +58,18 @@ class EsTransformer
   end
 
   def apply(value)
+    if value[:or]
+      { or: value[:or].map { |v| apply(v)}}
+    else
+      data = transform_data(value[:data], value[:op])
 
+      case value[:op]
+      when :eq
+        { term: { field => data } }
+      when :lt
+        { range: { field => { lt: data}}}
+      end
+    end
   end
 
   def transform_data(value, op)
