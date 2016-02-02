@@ -10,7 +10,14 @@ class Parser
   OPERATORS = %w[<> <= >= = < >]
 
   def parse(text)
-
+    if text.include?('||')
+      { or: text.split('||').map{|f| parse(f.strip)} }
+    else
+      OPERATORS.each do |op|
+        return { op: translate_operator(op), data: text[op.length..-1].strip} if text.start_with?(op)
+      end
+      { op: :eq, data: text}
+    end
   end
 
   def translate_operator(operator)
